@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | Dripkits</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --black: #0A0A0A;
+            --black-soft: #141414;
+            --charcoal: #1A1A1A;
+            --charcoal-line: #2B2B2B;
+            --gold: #D4AF37;
+            --gold-bright: #F0C846;
+            --off-white: #EDEAE0;
+            --muted: #9A958A;
+            --font-display: 'Anton', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --max-w: 960px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--black);
+            color: var(--off-white);
+            font-family: var(--font-body);
+            min-height: 100vh;
+        }
+
+        header {
+            border-bottom: 1px solid var(--charcoal-line);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            color: var(--off-white);
+            text-decoration: none;
+        }
+
+        .logo span { color: var(--gold); }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--charcoal-line);
+            color: var(--muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+        main {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 32px 24px 80px;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+
+        .card {
+            background: var(--black-soft);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-family: var(--font-display);
+            font-weight: 400;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .field.full { grid-column: 1 / -1; }
+
+        .field label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .field input {
+            width: 100%;
+            background: var(--charcoal);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 8px;
+            padding: 11px 14px;
+            color: var(--off-white);
+            font-size: 0.92rem;
+            font-family: var(--font-body);
+        }
+
+        .field input:focus { outline: none; border-color: var(--gold); }
+
+        .save-btn {
+            background: var(--gold);
+            color: var(--black);
+            border: none;
+            border-radius: 8px;
+            padding: 11px 22px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+
+        .save-btn:hover { background: var(--gold-bright); }
+
+        .save-msg {
+            display: none;
+            font-size: 0.82rem;
+            color: #7CD98A;
+            margin-top: 10px;
+        }
+
+        .order {
+            border: 1px solid var(--charcoal-line);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .order-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .order-head h4 { font-size: 0.95rem; }
+
+        .order-head .date { font-size: 0.78rem; color: var(--muted); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+        }
+
+        .status-badge.delivered { background: rgba(76, 175, 80, 0.15); color: #7CD98A; }
+        .status-badge.cancelled { background: rgba(220, 70, 70, 0.15); color: #ff8a8a; }
+
+        .order-items { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+        .order-items span { color: var(--off-white); }
+
+        .order-total { font-weight: 700; font-size: 0.9rem; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state a {
+            display: inline-block;
+            margin-top: 14px;
+            background: var(--gold);
+            color: var(--black);
+            padding: 10px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="index.html" class="logo">DRIP<span>KITS</span></a>
+        <button class="logout-btn" id="logoutBtn">Log Out</button>
+    </header>
+
+    <main>
+        <h1>My Account</h1>
+        <p class="sub" id="welcomeMsg">Loading your account...</p>
+
+        <div class="card">
+            <h2>Profile Details</h2>
+            <form id="profileForm">
+                <div class="form-row">
+                    <div class="field">
+                        <label for="acc-name">Full Name</label>
+                        <input type="text" id="acc-name" required>
+                    </div>
+                    <div class="field">
+                        <label for="acc-phone">Phone Number</label>
+                        <input type="tel" id="acc-phone" placeholder="01XXXXXXXXX">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field full">
+                        <label for="acc-email">Email</label>
+                        <input type="email" id="acc-email" placeholder="you@example.com">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field full">
+                        <label for="acc-address">Saved Address</label>
+                        <input type="text" id="acc-address" placeholder="House, Road, Area">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field">
+                        <label for="acc-city">City</label>
+                        <input type="text" id="acc-city" placeholder="e.g. Dhaka">
+                    </div>
+                </div>
+                <button type="submit" class="save-btn">Save Changes</button>
+                <p class="save-msg" id="saveMsg">Saved!</p>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Order History</h2>
+            <div id="ordersWrap">
+                <p class="sub">Loading your orders...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Must be logged in to view this page
+        if (!isLoggedIn()) {
+            window.location.href = 'login.html?returnTo=account.html';
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        async function loadProfile() {
+            try {
+                const res = await apiFetch('/api/customers/me');
+                const customer = await res.json();
+
+                document.getElementById('welcomeMsg').textContent = `Welcome back, ${customer.name}.`;
+                document.getElementById('acc-name').value = customer.name || '';
+                document.getElementById('acc-phone').value = customer.phone || '';
+                document.getElementById('acc-email').value = customer.email || '';
+                document.getElementById('acc-address').value = customer.address || '';
+                document.getElementById('acc-city').value = customer.city || '';
+            } catch (err) {
+                console.error('Failed to load profile:', err);
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const saveMsg = document.getElementById('saveMsg');
+            saveMsg.style.display = 'none';
+
+            try {
+                const res = await apiFetch('/api/customers/me', {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        name: document.getElementById('acc-name').value.trim(),
+                        phone: document.getElementById('acc-phone').value.trim() || null,
+                        email: document.getElementById('acc-email').value.trim() || null,
+                        address: document.getElementById('acc-address').value.trim(),
+                        city: document.getElementById('acc-city').value.trim()
+                    })
+                });
+                const updated = await res.json();
+                saveSession(getToken(), updated); // refresh cached name/etc. shown in nav on other pages
+                saveMsg.textContent = 'Saved!';
+                saveMsg.style.display = 'block';
+                document.getElementById('welcomeMsg').textContent = `Welcome back, ${updated.name}.`;
+            } catch (err) {
+                saveMsg.textContent = err.message;
+                saveMsg.style.color = '#ff8a8a';
+                saveMsg.style.display = 'block';
+            }
+        });
+
+        async function loadOrders() {
+            const wrap = document.getElementById('ordersWrap');
+            try {
+                const res = await apiFetch('/api/customers/me/orders');
+                const orders = await res.json();
+
+                if (orders.length === 0) {
+                    wrap.innerHTML = `
+                        <div class="empty-state">
+                            <p>You haven't placed any orders yet.</p>
+                            <a href="mens.html">Start Shopping</a>
+                        </div>`;
+                    return;
+                }
+
+                wrap.innerHTML = orders.map(o => `
+                    <div class="order">
+                        <div class="order-head">
+                            <h4>Order #${o.id}</h4>
+                            <span class="date">${new Date(o.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                        </div>
+                        <span class="status-badge ${o.orderStatus}">${o.orderStatus}</span>
+                        <div class="order-items" style="margin-top:10px;">
+                            ${o.items.map(i => `<div><span>${i.qty}x ${i.name}</span>${i.size ? ' · Size ' + i.size : ''}</div>`).join('')}
+                        </div>
+                        <div class="order-total">Total: Tk ${o.grandTotal}</div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                wrap.innerHTML = `<p class="sub">Couldn't load your orders right now.</p>`;
+            }
+        }
+
+        loadProfile();
+        loadOrders();
+    </script>
+</body>
+
+</html>

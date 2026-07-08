@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Checkout | Dripkits</title>
+    <meta name="description" content="Complete your Dripkits order. Choose your delivery area and payment method.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --black: #0A0A0A;
+            --black-soft: #141414;
+            --charcoal: #1A1A1A;
+            --charcoal-line: #2B2B2B;
+            --gold: #D4AF37;
+            --gold-bright: #F0C846;
+            --off-white: #EDEAE0;
+            --muted: #9A958A;
+            --font-display: 'Anton', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --max-w: 1100px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--off-white);
+            font-family: var(--font-body);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: inherit;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 3px;
+        }
+
+        .container {
+            max-width: var(--max-w);
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 0.01em;
+            line-height: 1.05;
+        }
+
+        .eyebrow {
+            font-size: 0.75rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--charcoal-line);
+        }
+
+        .nav-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            max-width: var(--max-w);
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            letter-spacing: 0.03em;
+        }
+
+        .logo span {
+            color: var(--gold);
+        }
+
+        .secure-tag {
+            font-size: 0.78rem;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .page-hero {
+            padding: 40px 0 8px;
+            text-align: center;
+        }
+
+        .page-hero h1 {
+            font-size: clamp(1.8rem, 5vw, 2.6rem);
+        }
+
+        .page-hero p {
+            color: var(--muted);
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* ============ STEP PROGRESS ============ */
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 24px 0 8px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            padding: 8px 14px;
+            border: 1px solid var(--charcoal-line);
+            border-radius: 30px;
+        }
+
+        .step.active {
+            color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        /* ============ LAYOUT ============ */
+        .checkout-section {
+            padding: 30px 0 90px;
+        }
+
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .card {
+            background: var(--black-soft);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 6px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 18px;
+        }
+
+        /* Delivery area */
+        .area-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .area-option {
+            border: 1.5px solid var(--charcoal-line);
+            border-radius: 6px;
+            padding: 18px;
+            cursor: pointer;
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+        .area-option:hover {
+            border-color: var(--gold);
+        }
+
+        .area-option.selected {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.06);
+        }
+
+        .area-option .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .area-option h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .area-option .fee {
+            font-weight: 800;
+            color: var(--gold);
+            font-size: 0.95rem;
+        }
+
+        .area-option p {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .area-option input {
+            display: none;
+        }
+
+        @media (max-width:540px) {
+            .area-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Form fields */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .field input,
+        .field textarea {
+            background: var(--black);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 3px;
+            padding: 13px 14px;
+            color: var(--off-white);
+            font-family: inherit;
+            font-size: 0.92rem;
+            transition: border-color .2s ease;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .field textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        @media (max-width:600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Payment methods */
+        .pay-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .pay-option {
+            border: 1.5px solid var(--charcoal-line);
+            border-radius: 6px;
+            padding: 16px 18px;
+            cursor: pointer;
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+        .pay-option:hover {
+            border-color: var(--gold);
+        }
+
+        .pay-option.selected {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.06);
+        }
+
+        .pay-option .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pay-option h4 {
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+
+        .pay-option p {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .pay-option input {
+            display: none;
+        }
+
+        .pay-details {
+            display: none;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid var(--charcoal-line);
+        }
+
+        .pay-option.selected .pay-details {
+            display: block;
+        }
+
+        .pay-number {
+            background: var(--black);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 4px;
+            padding: 10px 14px;
+            font-weight: 700;
+            color: var(--gold);
+            display: inline-block;
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .pay-instructions {
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .gateway-note {
+            font-size: 0.78rem;
+            color: var(--muted);
+            background: var(--black);
+            border: 1px dashed var(--charcoal-line);
+            border-radius: 4px;
+            padding: 12px 14px;
+            margin-top: 6px;
+        }
+
+        .cod-info-box {
+            border: 1.5px solid var(--charcoal-line);
+            border-radius: 6px;
+            padding: 16px 18px;
+            background: rgba(212, 175, 55, 0.04);
+        }
+
+        .pay-first-banner {
+            max-width: var(--max-w);
+            margin: 0 auto 18px;
+            padding: 16px 18px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1.5px solid var(--gold);
+            border-radius: 6px;
+            color: var(--off-white);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .send-money-box {
+            background: var(--black);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 6px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+
+        .send-money-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 0;
+        }
+
+        .send-money-row:not(:last-child) {
+            border-bottom: 1px solid var(--charcoal-line);
+        }
+
+        .send-money-row .app-name {
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+
+        .payment-proof-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .payment-proof-fields .field.full {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width:600px) {
+            .payment-proof-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .cod-warning {
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: var(--off-white);
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid var(--gold);
+            border-radius: 4px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+
+        .cod-fee-box {
+            background: var(--black);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 4px;
+            padding: 12px 14px;
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+
+        .cod-fee-box strong {
+            color: var(--gold);
+        }
+
+        /* Order summary */
+        .summary-items {
+            margin-bottom: 18px;
+        }
+
+        .summary-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--charcoal-line);
+        }
+
+        .summary-item img {
+            width: 56px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 3px;
+            background: var(--charcoal);
+        }
+
+        .si-info {
+            flex: 1;
+        }
+
+        .si-info h5 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .si-info .si-meta {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .si-price {
+            font-weight: 700;
+            color: var(--gold);
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            padding: 8px 0;
+            color: var(--muted);
+        }
+
+        .summary-row.total {
+            border-top: 1px solid var(--charcoal-line);
+            margin-top: 8px;
+            padding-top: 14px;
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: var(--off-white);
+        }
+
+        .summary-row.total span:last-child {
+            color: var(--gold);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 2px;
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px -8px rgba(212, 175, 55, 0.45);
+        }
+
+        .btn-primary:disabled {
+            background: var(--charcoal-line);
+            color: var(--muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-cart .emoji {
+            font-size: 2.6rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .empty-cart p {
+            color: var(--muted);
+            margin-bottom: 24px;
+        }
+
+        .empty-cart .btn {
+            width: auto;
+            display: inline-flex;
+            padding: 14px 28px;
+        }
+
+        .form-error {
+            color: #e25c5c;
+            font-size: 0.82rem;
+            margin-top: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        /* Success state */
+        .order-success {
+            display: none;
+            text-align: center;
+            padding: 70px 20px;
+        }
+
+        .order-success.show {
+            display: block;
+        }
+
+        .order-success .icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .order-success h2 {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+        }
+
+        .order-success p {
+            color: var(--muted);
+            margin-bottom: 24px;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .order-success .btn {
+            width: auto;
+            display: inline-flex;
+            padding: 14px 28px;
+        }
+
+        @media (max-width:880px) {
+            .checkout-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120%);
+            background: var(--off-white);
+            color: var(--black);
+            padding: 14px 24px;
+            border-radius: 3px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            z-index: 1600;
+            transition: transform .35s ease;
+            text-align: center;
+            max-width: 90vw;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="nav-wrap">
+            <a href="index.html" class="logo">DRIP<span>KITS</span></a>
+            <span class="secure-tag">🔒 Secure Checkout</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-hero">
+            <span class="eyebrow">Almost there</span>
+            <h1>Checkout</h1>
+            <p>Choose your delivery area, confirm your details, and place your order.</p>
+        </div>
+
+        <div class="pay-first-banner">
+            ⚠️ <strong>Pay your delivery charge via bKash or Nagad FIRST</strong>, then come back and fill in the form
+            below. You'll need the <strong>Transaction ID</strong> and the <strong>number you paid from</strong> to
+            complete your order.
+        </div>
+
+        <div class="steps">
+            <span class="step active">1. Delivery</span>
+            <span class="step active">2. Your Info</span>
+            <span class="step active">3. Payment</span>
+        </div>
+
+        <section class="checkout-section">
+            <div class="container" id="checkoutWrap">
+
+                <!-- Populated by JS: either checkout form or empty-cart message -->
+
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast">Order placed</div>
+
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="cart.js"></script>
+    <script>
+        const wrap = document.getElementById('checkoutWrap');
+        const DELIVERY_FEES = { inside: 80, outside: 130 };
+        let selectedArea = null;
+        let selectedPayment = null;
+
+        function renderCheckout() {
+            if (!isLoggedIn()) {
+                window.location.href = `login.html?returnTo=${encodeURIComponent('checkout.html')}`;
+                return;
+            }
+            if (!cart || !cart.items || cart.items.length === 0) {
+                wrap.innerHTML = `
+        <div class="empty-cart">
+          <span class="emoji">🛒</span>
+          <h2 style="margin-bottom:10px;">Your Cart is Empty</h2>
+          <p>Add a few items before checking out.</p>
+          <a href="mens.html" class="btn btn-primary">Shop Mens Collection</a>
+        </div>`;
+                return;
+            }
+
+            const subtotal = cart.subtotal;
+
+            wrap.innerHTML = `
+      <div class="checkout-layout">
+        <div>
+          <form id="checkoutForm">
+
+            <!-- Delivery Area -->
+            <div class="card">
+              <h2>Delivery Area</h2>
+              <div class="area-options" id="areaOptions">
+                <label class="area-option" data-area="inside">
+                  <input type="radio" name="area" value="inside">
+                  <div class="row"><h4>Inside Dhaka</h4><span class="fee">Tk ${DELIVERY_FEES.inside}</span></div>
+                  <p>Delivered in 1–2 business days</p>
+                </label>
+                <label class="area-option" data-area="outside">
+                  <input type="radio" name="area" value="outside">
+                  <div class="row"><h4>Outside Dhaka</h4><span class="fee">Tk ${DELIVERY_FEES.outside}</span></div>
+                  <p>Delivered in 3–5 business days</p>
+                </label>
+              </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="card">
+              <h2>Delivery Information</h2>
+              <div class="form-row">
+                <div class="field">
+                  <label for="ck-name">Full Name</label>
+                  <input type="text" id="ck-name" name="customer_name" required placeholder="Your full name">
+                </div>
+                <div class="field">
+                  <label for="ck-phone">Phone Number</label>
+                  <input type="tel" id="ck-phone" name="customer_phone" required placeholder="01XXXXXXXXX">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field full">
+                  <label for="ck-address">Full Address</label>
+                  <input type="text" id="ck-address" name="customer_address" required placeholder="House, Road, Area">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field">
+                  <label for="ck-city">City</label>
+                  <input type="text" id="ck-city" name="customer_city" required placeholder="e.g. Dhaka">
+                </div>
+                <div class="field">
+                  <label for="ck-email">Email (optional)</label>
+                  <input type="email" id="ck-email" name="customer_email" placeholder="you@example.com">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="field full">
+                  <label for="ck-notes">Order Notes (optional)</label>
+                  <textarea id="ck-notes" name="order_notes" placeholder="Delivery instructions, landmark, etc."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="card">
+              <h2>Payment Method</h2>
+
+              <div class="send-money-box">
+                <p class="pay-instructions" style="margin-bottom:10px;">
+                  Send the <strong>delivery charge</strong> (shown below) using <strong>Send Money</strong> on your
+                  bKash or Nagad app to one of these numbers:
+                </p>
+                <div class="send-money-row">
+                  <span class="app-name">📱 bKash</span>
+                  <span class="pay-number">+880 1307106175</span>
+                </div>
+                <div class="send-money-row">
+                  <span class="app-name">📱 Nagad</span>
+                  <span class="pay-number">+880 1307106175</span>
+                </div>
+              </div>
+
+              <!-- COD is the only payment method — no toggle needed -->
+              <div class="cod-info-box">
+                <div class="row" style="margin-bottom:6px;">
+                  <h4 style="font-size:0.92rem;font-weight:700;">💵 Cash on Delivery</h4>
+                </div>
+                <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px;">Pay the product price in cash when it arrives. <strong style="color:var(--off-white);">Delivery charge must be paid via bKash or Nagad first</strong> using the numbers above.</p>
+                <div class="cod-fee-box">
+                  Delivery charge to pay: <strong id="codFeeAmount">Select delivery area first</strong>
+                </div>
+              </div>
+
+              <!-- Payment proof — always visible, customer must fill this in -->
+              <div class="card" style="margin-top:14px;padding:18px;">
+                <h2 style="margin-bottom:14px;">Delivery Charge Payment Proof</h2>
+                <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;">After sending the delivery charge via bKash or Nagad, fill in the details below so we can confirm your payment.</p>
+                <div class="payment-proof-fields">
+                  <div class="field">
+                    <label for="ck-pay-app">Paid Using</label>
+                    <select id="ck-pay-app" name="payment_app" required>
+                      <option value="" disabled selected>Select app</option>
+                      <option value="bkash">bKash</option>
+                      <option value="nagad">Nagad</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="ck-payer-number">Number You Paid From</label>
+                    <input type="tel" id="ck-payer-number" name="payer_number" required placeholder="01XXXXXXXXX">
+                  </div>
+                  <div class="field full">
+                    <label for="ck-trx-id">Transaction ID</label>
+                    <input type="text" id="ck-trx-id" name="payment_trx_id" required placeholder="e.g. 9XY4ZK2ABC">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <p class="form-error" id="checkoutError">Something went wrong placing your order. Please try again or message us on WhatsApp.</p>
+        </div>
+
+        <!-- Order Summary -->
+        <div>
+          <div class="card">
+            <h2>Order Summary</h2>
+            <div class="summary-items" id="summaryItems"></div>
+            <div class="summary-row"><span>Products Total</span><span id="summarySubtotal">Tk 0</span></div>
+            <div class="summary-row"><span>Delivery Fee <span style="font-size:0.72rem;color:#4caf50;">(pay via bKash/Nagad)</span></span><span id="summaryDelivery" style="color:#4caf50;">Select area</span></div>
+            <div class="summary-row total"><span>💵 Pay on Delivery (Cash)</span><span id="summaryTotal">Tk 0</span></div>
+          </div>
+          <button class="btn btn-primary" id="placeOrderBtn" disabled>Select Delivery Area</button>
+        </div>
+      </div>
+
+      <div class="order-success" id="orderSuccess">
+        <div class="icon">🎉</div>
+        <h2>Order Placed!</h2>
+        <p>Thanks for your order — we'll contact you shortly to confirm delivery details.</p>
+        <a href="index.html" class="btn btn-primary">Back to Home</a>
+      </div>
+    `;
+
+            renderSummaryItems();
+            bindCheckoutEvents();
+            updateTotals(); // show correct totals including customization fee immediately
+            prefillFromProfile();
+        }
+
+        // Prefill name/phone/address/city from the logged-in customer's saved profile, if any
+        async function prefillFromProfile() {
+            try {
+                const res = await apiFetch('/api/customers/me');
+                const customer = await res.json();
+                if (customer.name) document.getElementById('ck-name').value = customer.name;
+                if (customer.phone) document.getElementById('ck-phone').value = customer.phone;
+                if (customer.email) document.getElementById('ck-email').value = customer.email;
+                if (customer.address) document.getElementById('ck-address').value = customer.address;
+                if (customer.city) document.getElementById('ck-city').value = customer.city;
+            } catch (err) {
+                console.error('Could not prefill profile:', err);
+            }
+        }
+
+        function renderSummaryItems() {
+            const wrapEl = document.getElementById('summaryItems');
+            wrapEl.innerHTML = cart.items.map(item => `
+      <div class="summary-item">
+        <img src="${resolveImg(item.image)}" alt="${item.name}">
+        <div class="si-info">
+          <h5>${item.name}</h5>
+          <div class="si-meta">${item.size ? 'Size ' + item.size : ''} • Qty ${item.qty}${item.customization ? `<br><span style="color:var(--gold);font-size:0.75rem;font-weight:600;">⚽ Jersey: #${item.customization.number || ''}${item.customization.name ? ' ' + item.customization.name : ''} <span style="font-size:0.7rem;">(+Tk 350 included)</span></span>` : ''}</div>
+        </div>
+        <span class="si-price">Tk ${item.price * item.qty}</span>
+      </div>
+    `).join('');
+        }
+
+        function updateTotals() {
+            const subtotal = cart.subtotal;
+            const fee = selectedArea ? DELIVERY_FEES[selectedArea] : 0;
+            const total = subtotal + fee;
+            document.getElementById('summarySubtotal').textContent = `Tk ${subtotal}`;
+            document.getElementById('summaryDelivery').textContent = selectedArea ? `Tk ${fee}` : 'Select area';
+            document.getElementById('summaryTotal').textContent = `Tk ${subtotal}`;
+            const codFeeEl = document.getElementById('codFeeAmount');
+            if (codFeeEl) codFeeEl.textContent = selectedArea ? `Tk ${fee}` : 'Select delivery area first';
+            return total;
+        }
+
+        function checkFormReady() {
+            const btn = document.getElementById('placeOrderBtn');
+            if (!selectedArea) { btn.disabled = true; btn.textContent = 'Select Delivery Area'; return; }
+            btn.disabled = false;
+            btn.textContent = 'Place Order';
+        }
+
+        function bindCheckoutEvents() {
+            /* Delivery area selection */
+            document.querySelectorAll('.area-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    document.querySelectorAll('.area-option').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    opt.querySelector('input').checked = true;
+                    selectedArea = opt.dataset.area;
+                    updateTotals();
+                    checkFormReady();
+                });
+            });
+
+            /* Place order — order is created directly once payment proof is filled in */
+            document.getElementById('placeOrderBtn').addEventListener('click', async () => {
+                const form = document.getElementById('checkoutForm');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                document.getElementById('checkoutError').style.display = 'none';
+
+                const total = updateTotals();
+                const deliveryFee = DELIVERY_FEES[selectedArea];
+
+                const subtotal = cart.subtotal;
+                const orderPayload = {
+                    customerName: document.getElementById('ck-name').value.trim(),
+                    customerPhone: document.getElementById('ck-phone').value.trim(),
+                    customerEmail: document.getElementById('ck-email').value.trim() || null,
+                    customerAddress: document.getElementById('ck-address').value.trim(),
+                    customerCity: document.getElementById('ck-city').value.trim(),
+                    orderNotes: document.getElementById('ck-notes').value.trim() || null,
+                    deliveryArea: selectedArea,
+                    deliveryFee: deliveryFee,
+                    itemsTotal: subtotal,
+                    grandTotal: total,
+                    paymentMethod: 'cod',
+                    paymentApp: document.getElementById('ck-pay-app').value,
+                    payerNumber: document.getElementById('ck-payer-number').value.trim(),
+                    paymentTransactionId: document.getElementById('ck-trx-id').value.trim(),
+                    // Map cart items back to { id, qty, size, customization } — the server
+                    // recalculates every price itself, so we never send price here.
+                    items: cart.items.map(i => ({ id: i.productId, qty: i.qty, size: i.size, customization: i.customization }))
+                };
+
+                if (!orderPayload.paymentApp || !orderPayload.payerNumber || !orderPayload.paymentTransactionId) {
+                    document.getElementById('checkoutError').textContent = 'Please fill in the bKash/Nagad payment details so we can confirm your delivery charge.';
+                    document.getElementById('checkoutError').style.display = 'block';
+                    return;
+                }
+
+                const btn = document.getElementById('placeOrderBtn');
+                btn.disabled = true;
+                btn.textContent = 'Placing Order...';
+
+                try {
+                    const res = await apiFetch('/api/orders', {
+                        method: 'POST',
+                        body: JSON.stringify(orderPayload)
+                    });
+                    const data = await res.json();
+
+                    if (data.orderId) {
+                        cart = { items: [], subtotal: 0 }; // server already cleared the saved cart for this account
+                        // Redirect to invoice page with the order ID
+                        window.location.href = `invoice.html?order=${data.orderId}`;
+                    } else {
+                        throw new Error(data.error || 'Could not place order');
+                    }
+                } catch (err) {
+                    document.getElementById('checkoutError').textContent = `Could not place your order (${err.message}). Make sure the backend is running, or message us on WhatsApp.`;
+                    document.getElementById('checkoutError').style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'Place Order';
+                }
+            });
+        }
+
+        // BACKEND_URL now comes from config.js (shared across all pages)
+        // Wait for the logged-in customer's cart to actually load from the
+        // backend before rendering — otherwise this would briefly (and
+        // incorrectly) show "Cart is Empty" while the fetch is still in flight.
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!isLoggedIn()) {
+                window.location.href = `login.html?returnTo=${encodeURIComponent('checkout.html')}`;
+                return;
+            }
+            await refreshCart();
+            renderCheckout();
+        });
+
+    </script>
+
+</body>
+
+</html>

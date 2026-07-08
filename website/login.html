@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In | Dripkits</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --black: #0A0A0A;
+            --black-soft: #141414;
+            --charcoal: #1A1A1A;
+            --charcoal-line: #2B2B2B;
+            --gold: #D4AF37;
+            --gold-bright: #F0C846;
+            --off-white: #EDEAE0;
+            --muted: #9A958A;
+            --font-display: 'Anton', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--black);
+            color: var(--off-white);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            color: var(--off-white);
+            text-decoration: none;
+            margin-bottom: 28px;
+        }
+
+        .logo span { color: var(--gold); }
+
+        .auth-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--black-soft);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 14px;
+            padding: 32px 28px;
+        }
+
+        .auth-card h1 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .auth-card .sub {
+            color: var(--muted);
+            font-size: 0.88rem;
+            margin-bottom: 24px;
+        }
+
+        .field { margin-bottom: 16px; }
+
+        .field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .field input {
+            width: 100%;
+            background: var(--charcoal);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--off-white);
+            font-size: 0.95rem;
+            font-family: var(--font-body);
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--gold);
+            color: var(--black);
+            border: none;
+            border-radius: 8px;
+            padding: 13px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover { background: var(--gold-bright); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .form-error {
+            display: none;
+            background: rgba(220, 70, 70, 0.12);
+            border: 1px solid rgba(220, 70, 70, 0.4);
+            color: #ff8a8a;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .switch-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+
+        .switch-link a { color: var(--gold); text-decoration: none; font-weight: 600; }
+        .switch-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="logo">DRIP<span>KITS</span></a>
+
+    <div class="auth-card">
+        <h1>Welcome Back</h1>
+        <p class="sub">Log in to see your orders and cart.</p>
+
+        <p class="form-error" id="loginError"></p>
+
+        <form id="loginForm">
+            <div class="field">
+                <label for="identifier">Email or Phone Number</label>
+                <input type="text" id="identifier" required placeholder="you@example.com or 01XXXXXXXXX" autocomplete="username">
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-primary" id="loginBtn">Log In</button>
+        </form>
+
+        <p class="switch-link">Don't have an account? <a href="signup.html">Sign up</a></p>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // If already logged in, no need to be here
+        if (isLoggedIn()) {
+            const params = new URLSearchParams(window.location.search);
+            window.location.href = params.get('returnTo') || 'account.html';
+        }
+
+        const form = document.getElementById('loginForm');
+        const errorEl = document.getElementById('loginError');
+        const btn = document.getElementById('loginBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorEl.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/customers/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        identifier: document.getElementById('identifier').value.trim(),
+                        password: document.getElementById('password').value
+                    })
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || 'Could not log in');
+
+                saveSession(data.token, data.customer);
+                const params = new URLSearchParams(window.location.search);
+                window.location.href = params.get('returnTo') || 'account.html';
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Log In';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order | Dripkits</title>
+    <meta name="description" content="Track your Dripkits order status using your order number.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --black: #0A0A0A;
+            --black-soft: #141414;
+            --charcoal: #1A1A1A;
+            --charcoal-line: #2B2B2B;
+            --gold: #D4AF37;
+            --gold-bright: #F0C846;
+            --off-white: #EDEAE0;
+            --muted: #9A958A;
+            --font-display: 'Anton', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--off-white);
+            font-family: var(--font-body);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        header {
+            background: var(--black-soft);
+            border-bottom: 1px solid var(--charcoal-line);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+            color: var(--off-white);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--gold);
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-left: 20px;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: var(--gold);
+        }
+
+        /* ── Hero ── */
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+
+        .hero .eyebrow {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--gold);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        /* ── Search box ── */
+        .search-wrap {
+            max-width: 480px;
+            margin: 0 auto 48px;
+            padding: 0 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0;
+            background: var(--black-soft);
+            border: 1.5px solid var(--charcoal-line);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--gold);
+        }
+
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 14px 18px;
+            color: var(--off-white);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+        }
+
+        .search-box input::placeholder {
+            color: var(--muted);
+        }
+
+        .search-box button {
+            background: var(--gold);
+            border: none;
+            padding: 0 22px;
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #000;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .search-box button:hover {
+            background: var(--gold-bright);
+        }
+
+        /* ── Result area ── */
+        .result {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        /* ── State box ── */
+        .state-box {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .state-box .emoji {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 14px;
+        }
+
+        .state-box h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+
+        .state-box p {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        /* ── Order card ── */
+        .order-card {
+            background: var(--black-soft);
+            border: 1px solid var(--charcoal-line);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .order-card-header {
+            background: var(--charcoal);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 1px solid var(--charcoal-line);
+        }
+
+        .order-num {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .order-num span {
+            color: var(--gold);
+        }
+
+        .order-date {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        .order-card-body {
+            padding: 24px;
+        }
+
+        /* ── Status Timeline ── */
+        .timeline-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 32px;
+            margin-bottom: 28px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: var(--charcoal-line);
+        }
+
+        .tl-step {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .tl-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .tl-dot {
+            position: absolute;
+            left: -32px;
+            top: 3px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--charcoal-line);
+            background: var(--black-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            transition: all 0.3s;
+        }
+
+        .tl-step.done .tl-dot {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: #000;
+        }
+
+        .tl-step.current .tl-dot {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: #000;
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+        }
+
+        .tl-step.cancelled .tl-dot {
+            background: #ef5350;
+            border-color: #ef5350;
+            color: #fff;
+        }
+
+        .tl-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .tl-step.done .tl-label,
+        .tl-step.current .tl-label {
+            color: var(--off-white);
+        }
+
+        .tl-step:not(.done):not(.current):not(.cancelled) .tl-label {
+            color: var(--muted);
+        }
+
+        .tl-step.cancelled .tl-label {
+            color: #ef5350;
+        }
+
+        .tl-sub {
+            font-size: 0.78rem;
+            color: var(--muted);
+        }
+
+        /* ── Divider ── */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--charcoal-line);
+            margin: 20px 0;
+        }
+
+        /* ── Order info grid ── */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-block h4 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .info-block p {
+            font-size: 0.85rem;
+        }
+
+        /* ── Items ── */
+        .items-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--charcoal-line);
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-row img {
+            width: 44px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: var(--charcoal);
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-info .name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .item-info .meta {
+            font-size: 0.76rem;
+            color: var(--muted);
+        }
+
+        .item-price {
+            font-size: 0.85rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        /* ── Totals ── */
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.84rem;
+            padding: 5px 0;
+            color: var(--muted);
+        }
+
+        .total-row.grand {
+            color: var(--off-white);
+            font-weight: 800;
+            font-size: 0.95rem;
+            border-top: 1px solid var(--charcoal-line);
+            margin-top: 8px;
+            padding-top: 12px;
+        }
+
+        /* ── Action buttons ── */
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: #000;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--off-white);
+            border: 1.5px solid var(--charcoal-line);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--gold);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a href="index.html" class="logo">DRIP<span>KITS</span></a>
+        <nav>
+            <a href="mens.html">Shop</a>
+            <a href="index.html">Home</a>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <span class="eyebrow">Real-time updates</span>
+        <h1>TRACK YOUR ORDER</h1>
+        <p>Enter your order number to see where your package is right now.</p>
+    </div>
+
+    <div class="search-wrap">
+        <div class="search-box">
+            <input type="number" id="orderInput" placeholder="Enter order number e.g. 42" min="1">
+            <button onclick="trackOrder()">Track →</button>
+        </div>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <script src="config.js"></script>
+    <script>
+
+        // If URL has ?order=X, auto-load it
+        const params = new URLSearchParams(window.location.search);
+        const autoId = params.get('order');
+        if (autoId) {
+            document.getElementById('orderInput').value = autoId;
+            trackOrder();
+        }
+
+        // Allow pressing Enter in the input
+        document.getElementById('orderInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') trackOrder();
+        });
+
+        async function trackOrder() {
+            const id = document.getElementById('orderInput').value.trim();
+            const result = document.getElementById('result');
+
+            if (!id) {
+                result.innerHTML = `<div class="state-box"><span class="emoji">👆</span><h2>Enter your order number</h2><p>It was shown on your invoice after placing the order.</p></div>`;
+                return;
+            }
+
+            result.innerHTML = `<div class="state-box"><span class="emoji">🔍</span><h2>Looking up order #${id}...</h2></div>`;
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/orders/${id}/track`);
+                const data = await res.json();
+
+                if (!res.ok) {
+                    result.innerHTML = `<div class="state-box"><span class="emoji">❌</span><h2>Order not found</h2><p>${data.error || 'No order with that number exists.'}</p></div>`;
+                    return;
+                }
+
+                renderResult(data);
+
+            } catch (err) {
+                result.innerHTML = `<div class="state-box"><span class="emoji">⚠️</span><h2>Could not connect</h2><p>Make sure the backend is running, then try again.</p></div>`;
+            }
+        }
+
+        // Step order for the timeline
+        const STEPS = [
+            { key: 'pending', label: 'Order Received', icon: '📋', sub: 'We have your order and are verifying your delivery charge payment.' },
+            { key: 'confirmed', label: 'Order Confirmed', icon: '✅', sub: 'Payment verified! Your order is being prepared.' },
+            { key: 'shipped', label: 'Shipped / On the Way', icon: '🚚', sub: 'Your parcel is on its way to you.' },
+            { key: 'delivered', label: 'Delivered', icon: '🎉', sub: 'Your order has been delivered. Enjoy!' },
+        ];
+
+        function renderResult(o) {
+            const isCancelled = o.orderStatus === 'cancelled';
+            const currentIdx = STEPS.findIndex(s => s.key === o.orderStatus);
+
+            const timelineHtml = isCancelled
+                ? `<div class="tl-step cancelled">
+                       <div class="tl-dot">✕</div>
+                       <div class="tl-label">Order Cancelled</div>
+                       <div class="tl-sub">This order has been cancelled. Please contact us if you have questions.</div>
+                   </div>`
+                : STEPS.map((step, idx) => {
+                    const isDone = idx < currentIdx;
+                    const isCurrent = idx === currentIdx;
+                    const cls = isDone ? 'done' : isCurrent ? 'current' : '';
+                    return `
+                        <div class="tl-step ${cls}">
+                            <div class="tl-dot">${isDone ? '✓' : step.icon}</div>
+                            <div class="tl-label">${step.label}${isCurrent ? ' <span style="font-size:0.72rem;color:var(--gold);font-weight:400;">(Current)</span>' : ''}</div>
+                            <div class="tl-sub">${isCurrent || isDone ? step.sub : ''}</div>
+                        </div>`;
+                }).join('');
+
+            const itemsHtml = o.items.map(item => `
+                <div class="item-row">
+                    <img src="${item.img || 'favicon.png'}" alt="${item.name}" onerror="this.src='favicon.png'">
+                    <div class="item-info">
+                        <div class="name">${item.name}</div>
+                        <div class="meta">${item.size ? 'Size: ' + item.size + ' &nbsp;·&nbsp; ' : ''}Qty: ${item.qty}${item.customization ? `<br><span style="color:#D4AF37;font-weight:600;">⚽ Name: ${item.customization.name || '—'} &nbsp;·&nbsp; Number: ${item.customization.number || '—'}</span>` : ''}</div>
+                    </div>
+                    <div class="item-price">Tk ${(item.price * item.qty).toLocaleString()}</div>
+                </div>`
+            ).join('');
+
+            const formatDate = iso => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            document.getElementById('result').innerHTML = `
+                <div class="order-card">
+                    <div class="order-card-header">
+                        <div>
+                            <div class="order-num">Order <span>#${o.orderId}</span></div>
+                            <div class="order-date">Placed on ${formatDate(o.createdAt)}</div>
+                        </div>
+                        <a href="invoice.html?order=${o.orderId}" class="btn btn-outline" style="font-size:0.78rem;padding:8px 14px;">🧾 View Invoice</a>
+                    </div>
+
+                    <div class="order-card-body">
+
+                        <div class="timeline-title">Order Status</div>
+                        <div class="timeline">${timelineHtml}</div>
+
+                        <hr class="divider">
+
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <h4>Customer</h4>
+                                <p>${o.customerName}, ${o.customerCity}</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Delivery Area</h4>
+                                <p>${o.deliveryArea === 'inside' ? 'Inside Dhaka' : 'Outside Dhaka'}</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Payment Method</h4>
+                                <p>Cash on Delivery</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Delivery Charge</h4>
+                                <p>${o.paymentStatus === 'paid'
+                    ? '<span style="color:#4caf50;font-weight:700;">✅ Verified</span>'
+                    : '<span style="color:#e0a800;font-weight:700;">⏳ Pending Verification</span>'}
+                                </p>
+                            </div>
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="items-title">Items in This Order</div>
+                        ${itemsHtml}
+
+                        <div style="margin-top:16px;">
+                            <div class="total-row"><span>Products Total</span><span>Tk ${o.itemsTotal.toLocaleString()}</span></div>
+                            <div class="total-row"><span>Delivery Fee <span style="color:#4caf50;font-size:0.75rem;">(already paid via ${o.paymentApp ? o.paymentApp.toUpperCase() : 'bKash/Nagad'})</span></span><span style="color:#4caf50;">Tk ${o.deliveryFee.toLocaleString()}</span></div>
+                            <div class="total-row grand"><span>💵 Pay on Delivery (Cash)</span><span>Tk ${o.itemsTotal.toLocaleString()}</span></div>
+                        </div>
+
+                        <div class="card-actions">
+                            <a href="invoice.html?order=${o.orderId}" class="btn btn-primary">🧾 View Full Invoice</a>
+                            <a href="mens.html" class="btn btn-outline">🛍️ Shop More</a>
+                        </div>
+
+                    </div>
+                </div>`;
+        }
+    </script>
+
+</body>
+
+</html>
