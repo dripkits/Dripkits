@@ -1257,7 +1257,8 @@
             <div class="tab-content" id="tab-customers">
                 <div class="page-header">
                     <h1>Customers</h1>
-                    <p>Everyone who has created an account on your site. Click a customer to see their order history.</p>
+                    <p>Everyone who has created an account on your site. Click a customer to see their order history.
+                    </p>
                 </div>
                 <div class="toolbar">
                     <input class="search-input" id="customerSearch" placeholder="🔍 Search name, email or phone…"
@@ -1331,46 +1332,30 @@
                         <input type="text" id="pName" placeholder="e.g. Dripkits Classic Jersey">
                     </div>
 
-                    <div class="field">
+                    <div class="field full">
                         <label>Category *</label>
-                        <select id="pCat">
-                            <option value="jersey">Jersey</option>
-                            <option value="tshirt">T-Shirt</option>
-                            <option value="hoodie">Hoodie</option>
-                            <option value="shorts">Shorts</option>
-                            <option value="tracksuit">Tracksuit</option>
-                            <option value="other">Other</option>
-                        </select>
+                        <input type="text" id="pCat" list="pCatList"
+                            placeholder="Type a category, e.g. Jerseys, Drop-Shoulders…">
+                        <datalist id="pCatList"></datalist>
+                        <span class="hint">Start typing to see existing categories, or type a brand-new one to create it
+                            instantly.</span>
                     </div>
 
                     <div class="field">
-                        <label>Category Label (shown on site)</label>
-                        <input type="text" id="pCatLabel" placeholder="e.g. Jerseys">
+                        <label>Original Price (Tk) *</label>
+                        <input type="number" id="pPrice" placeholder="e.g. 1200" min="0">
                     </div>
 
                     <div class="field">
-                        <label>Price (Tk) *</label>
-                        <input type="number" id="pPrice" placeholder="e.g. 850" min="0">
+                        <label>Discounted Price (Tk)</label>
+                        <input type="number" id="pDiscountedPrice" placeholder="Leave blank if no discount" min="0">
+                        <span class="hint">If filled, customers pay this price and see the original price crossed
+                            out.</span>
                     </div>
 
-                    <div class="field">
+                    <div class="field full">
                         <label>Badge (optional)</label>
                         <input type="text" id="pBadge" placeholder="e.g. NEW, HOT, LIMITED">
-                    </div>
-
-                    <div class="field">
-                        <label>Discount Type</label>
-                        <select id="pDiscountType" onchange="toggleDiscountField()">
-                            <option value="">No Discount</option>
-                            <option value="percent">Percentage Off (%)</option>
-                            <option value="fixed">Fixed Amount Off (Tk)</option>
-                        </select>
-                    </div>
-
-                    <div class="field" id="discountValueField" style="display:none;">
-                        <label id="discountValueLabel">Discount Amount</label>
-                        <input type="number" id="pDiscountValue" placeholder="e.g. 10" min="0">
-                        <span class="hint" id="discountHint"></span>
                     </div>
 
                     <div class="field full">
@@ -1822,6 +1807,8 @@
             const res = await fetch(`${API}/products/admin/all`, { headers: authH() });
             if (!res.ok) return;
             const products = await res.json();
+            const cats = [...new Set(products.map(p => p.catLabel || p.cat))];
+            document.getElementById('pCatList').innerHTML = cats.map(c => `<option value="${c}"></option>`).join('');
             const grid = document.getElementById('productsGrid');
             if (!products.length) { grid.innerHTML = `<div class="empty-state"><span class="icon">👕</span>No products yet. Click "Add New Product" to start.</div>`; return; }
             grid.innerHTML = products.map(p => {
@@ -1866,11 +1853,8 @@
             editingProductId = null; productImages = [];
             document.getElementById('modalTitle').textContent = 'Add New Product';
             document.getElementById('saveProductBtn').textContent = 'Save Product';
-            ['pName', 'pBadge', 'pDesc', 'pPrice', 'pCatLabel', 'pDiscountValue'].forEach(id => document.getElementById(id).value = '');
-            document.getElementById('pCat').value = 'jersey';
-            document.getElementById('pDiscountType').value = '';
+            ['pName', 'pBadge', 'pDesc', 'pPrice', 'pDiscountedPrice', 'pCat'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('pActive').checked = true;
-            document.getElementById('discountValueField').style.display = 'none';
             document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
             document.getElementById('imgPreviews').innerHTML = '';
             document.getElementById('productModal').classList.add('open');
@@ -1884,27 +1868,18 @@
             document.getElementById('modalTitle').textContent = 'Edit Product';
             document.getElementById('saveProductBtn').textContent = 'Update Product';
             document.getElementById('pName').value = p.name;
-            document.getElementById('pCat').value = p.cat;
-            document.getElementById('pCatLabel').value = p.catLabel || '';
-            document.getElementById('pPrice').value = p.price;
+            document.getElementById('pCat').value = p.catLabel || p.cat;
+            document.getElementById('pPrice').value = p.oldPrice || p.price;
+            document.getElementById('pDiscountedPrice').value = p.oldPrice ? p.price : '';
             document.getElementById('pBadge').value = p.badge || '';
             document.getElementById('pDesc').value = p.description || '';
-            document.getElementById('pDiscountType').value = p.discountType || '';
-            document.getElementById('pDiscountValue').value = p.discountValue || '';
             document.getElementById('pActive').checked = p.active;
-            toggleDiscountField();
             document.querySelectorAll('.size-chip').forEach(c => c.classList.toggle('selected', p.sizes.includes(c.dataset.size)));
             renderImagePreviews();
             document.getElementById('productModal').classList.add('open');
         }
         function closeProductModal() { document.getElementById('productModal').classList.remove('open'); }
         function toggleSize(el) { el.classList.toggle('selected'); }
-        function toggleDiscountField() {
-            const type = document.getElementById('pDiscountType').value;
-            document.getElementById('discountValueField').style.display = type ? 'flex' : 'none';
-            if (type === 'percent') { document.getElementById('discountValueLabel').textContent = 'Percentage Off (%)'; document.getElementById('discountHint').textContent = 'e.g. 10 means 10% off'; }
-            else if (type === 'fixed') { document.getElementById('discountValueLabel').textContent = 'Fixed Amount Off (Tk)'; document.getElementById('discountHint').textContent = 'e.g. 50 means Tk 50 off'; }
-        }
 
         // ── DRAG & DROP IMAGE UPLOAD ──
         function setupDragDrop() {
@@ -1934,18 +1909,27 @@
         // ── SAVE PRODUCT ──
         async function saveProduct() {
             const name = document.getElementById('pName').value.trim();
-            const price = document.getElementById('pPrice').value;
+            const originalPrice = Number(document.getElementById('pPrice').value);
+            const catInput = document.getElementById('pCat').value.trim();
             if (!name) return toast('Product name is required', 'error');
-            if (!price) return toast('Price is required', 'error');
+            if (!originalPrice) return toast('Original price is required', 'error');
+            if (!catInput) return toast('Category is required', 'error');
+
+            const discRaw = document.getElementById('pDiscountedPrice').value;
+            const hasDiscount = discRaw !== '' && Number(discRaw) > 0 && Number(discRaw) < originalPrice;
+            const finalPrice = hasDiscount ? Number(discRaw) : originalPrice;
+            const catSlug = catInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
             const sizes = [...document.querySelectorAll('.size-chip.selected')].map(c => c.dataset.size);
             const payload = {
-                name, price: Number(price),
-                cat: document.getElementById('pCat').value,
-                catLabel: document.getElementById('pCatLabel').value.trim() || document.getElementById('pCat').value,
+                name, price: finalPrice,
+                oldPrice: hasDiscount ? originalPrice : null,
+                cat: catSlug,
+                catLabel: catInput,
                 badge: document.getElementById('pBadge').value.trim() || null,
                 description: document.getElementById('pDesc').value.trim(),
-                discountType: document.getElementById('pDiscountType').value || null,
-                discountValue: Number(document.getElementById('pDiscountValue').value) || 0,
+                discountType: hasDiscount ? 'fixed' : null,
+                discountValue: hasDiscount ? (originalPrice - finalPrice) : 0,
                 sizes, outOfStock: [], images: productImages,
                 active: document.getElementById('pActive').checked
             };
