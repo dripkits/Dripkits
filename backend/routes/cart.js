@@ -8,7 +8,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { requireCustomer } = require('../middleware/auth');
-const { effectivePrice, CUSTOM_FEE } = require('../priceUtils');
+const { CUSTOM_FEE } = require('../priceUtils');
 
 // Build the full cart response: each saved cart row joined with live product
 // data, so price/name/image/stock always reflect the current catalog.
@@ -21,7 +21,9 @@ function buildCart(customerId) {
         if (!product || !product.active) continue; // silently drop items for products that no longer exist/are hidden
 
         const customization = row.customization ? JSON.parse(row.customization) : null;
-        let price = effectivePrice(product.price, product.discountType, product.discountValue);
+        // product.price is already the final price the admin panel saved
+        // (discount, if any, is already baked in) — do not recalculate it here.
+        let price = product.price;
         if (customization && (customization.name || customization.number)) price += CUSTOM_FEE;
 
         items.push({

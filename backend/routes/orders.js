@@ -11,7 +11,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { requireAdmin, requireCustomer } = require('../middleware/auth');
-const { effectivePrice, CUSTOM_FEE, DELIVERY_FEES } = require('../priceUtils');
+const { CUSTOM_FEE, DELIVERY_FEES } = require('../priceUtils');
 const nodemailer = require('nodemailer');
 
 // Gmail transporter — credentials loaded from .env
@@ -83,9 +83,11 @@ router.post('/', requireCustomer, (req, res) => {
 
     // ---------- SERVER-SIDE PRICE VALIDATION ----------
     // Never trust prices/totals sent by the browser — always recompute them
-    // from the products table, using the same discount + customization-fee
-    // math the storefront uses. This is what stops someone from tampering
-    // with the cart in devtools to pay less than the real price.
+    // from the products table. product.price is already the final price the
+    // admin panel saved (discount, if any, already baked in), so we use it
+    // directly and only add the customization fee on top — this is what
+    // stops someone from tampering with the cart in devtools to pay less
+    // than the real price, without re-applying the discount a second time.
     let itemsTotal = 0;
     const verifiedItems = [];
 
@@ -95,7 +97,7 @@ router.post('/', requireCustomer, (req, res) => {
             return res.status(400).json({ error: `Product #${item.id} is not available` });
         }
 
-        let price = effectivePrice(product.price, product.discountType, product.discountValue);
+        let price = product.price;
         if (item.customization && (item.customization.name || item.customization.number)) {
             price += CUSTOM_FEE;
         }
@@ -156,7 +158,7 @@ router.post('/', requireCustomer, (req, res) => {
 
     // Save/update this customer's address+city on their profile for next time
     db.prepare('UPDATE customers SET address = ?, city = ? WHERE id = ?')
-      .run(o.customerAddress, o.customerCity, req.customer.id);
+        .run(o.customerAddress, o.customerCity, req.customer.id);
 
     // Send order notification email via Gmail
     transporter.sendMail({
