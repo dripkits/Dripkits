@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { requireAdmin } = require('../middleware/auth');
-const { effectivePrice } = require('../priceUtils');
 
 function rowToProduct(row) {
     return {
@@ -25,31 +24,28 @@ function rowToProduct(row) {
     };
 }
 
+/* The admin panel already saves the FINAL price customers should pay in
+   `price`, and the original (pre-discount) price in `oldPrice`. So the
+   public routes below just serve those fields as-is — no recalculation.
+   (Recalculating here was applying the discount a second time on top of
+   the already-discounted price, which is the bug this fixes.) */
+function withBadge(p) {
+    if (p.oldPrice && p.discountType && p.discountValue && !p.badge) {
+        p.badge = p.discountType === 'percent' ? `${p.discountValue}% OFF` : `Tk ${p.discountValue} OFF`;
+    }
+    return p;
+}
+
 router.get('/', (req, res) => {
     const rows = db.prepare('SELECT * FROM products WHERE active = 1 ORDER BY id').all();
-    res.json(rows.map(r => {
-        const p = rowToProduct(r);
-        // If there's a discount, set oldPrice to original and price to discounted
-        if (p.discountType && p.discountValue) {
-            p.oldPrice = p.price;
-            p.price = effectivePrice(p.price, p.discountType, p.discountValue);
-            if (!p.badge) p.badge = p.discountType === 'percent' ? `${p.discountValue}% OFF` : `Tk ${p.discountValue} OFF`;
-        }
-        return p;
-    }));
+    res.json(rows.map(r => withBadge(rowToProduct(r))));
 });
 
 /* PUBLIC: single product */
 router.get('/:id', (req, res) => {
     const row = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
     if (!row) return res.status(404).json({ error: 'Product not found' });
-    const p = rowToProduct(row);
-    if (p.discountType && p.discountValue) {
-        p.oldPrice = p.price;
-        p.price = effectivePrice(p.price, p.discountType, p.discountValue);
-        if (!p.badge) p.badge = p.discountType === 'percent' ? `${p.discountValue}% OFF` : `Tk ${p.discountValue} OFF`;
-    }
-    res.json(p);
+    res.json(withBadge(rowToProduct(row)));
 });
 
 /* ADMIN: all products including hidden — MUST be before /:id */
