@@ -504,6 +504,17 @@
             text-decoration: line-through;
         }
 
+        .discount-tag {
+            font-size: 0.68rem;
+            font-weight: 800;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            padding: 2px 7px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
         /* Size selector */
         .size-label {
             font-size: 0.7rem;
@@ -1029,14 +1040,7 @@
 
         <div class="tabs-bar">
             <div class="tabs-row container" id="tabsRow">
-                <button class="tab-btn active" data-cat="all">All <span class="count" id="count-all"></span></button>
-                <button class="tab-btn" data-cat="jerseys">Jerseys <span class="count"
-                        id="count-jerseys"></span></button>
-                <button class="tab-btn" data-cat="tshirts">T-Shirts <span class="count"
-                        id="count-tshirts"></span></button>
-                <button class="tab-btn" data-cat="dropshoulders">Drop-Shoulders <span class="count"
-                        id="count-dropshoulders"></span></button>
-                <button class="tab-btn" data-cat="shirts">Shirts <span class="count" id="count-shirts"></span></button>
+                <!-- Tabs are now generated dynamically by JS from whatever categories exist in the database -->
             </div>
         </div>
 
@@ -1072,12 +1076,8 @@
                 </div>
                 <div class="footer-col">
                     <h5>Shop</h5>
-                    <ul>
-                        <li><a href="mens.html#jerseys">Jerseys</a></li>
-                        <li><a href="mens.html#tshirts">T-Shirts</a></li>
-                        <li><a href="mens.html#dropshoulders">Drop-Shoulders</a></li>
-
-                        <li><a href="mens.html#shirts">Shirts</a></li>
+                    <ul id="footerShopLinks">
+                        <!-- Generated dynamically by JS to match live categories -->
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -1128,16 +1128,42 @@
         let activeCat = "all";
         const selectedSizes = {}; // productId -> chosen size
 
-        /* ============ TAB COUNTS ============ */
-        function updateCounts() {
-            document.getElementById('count-all').textContent = `(${PRODUCTS.length})`;
-            ["tshirts", "dropshoulders", "jerseys", "shirts"].forEach(c => {
-                const n = PRODUCTS.filter(p => p.cat === c).length;
-                document.getElementById(`count-${c}`).textContent = `(${n})`;
+        /* ============ DYNAMIC CATEGORY LIST ============
+           Instead of a fixed list, we build the category tabs from
+           whatever "cat" / "catLabel" values actually exist on live
+           products. New categories added in the admin panel show up
+           here automatically — no code changes needed. */
+        let CATS = []; // [{ cat, catLabel }]
+
+        function buildCategoryList() {
+            const seen = new Map();
+            PRODUCTS.forEach(p => {
+                if (!seen.has(p.cat)) seen.set(p.cat, p.catLabel || p.cat);
             });
+            CATS = [...seen.entries()].map(([cat, catLabel]) => ({ cat, catLabel }));
         }
 
-        const CAT_TITLES = { all: "All Products", tshirts: "T-Shirts", dropshoulders: "Drop-Shoulders", jerseys: "Jerseys", shirts: "Shirts" };
+        function renderTabs() {
+            const tabsRow = document.getElementById('tabsRow');
+            const allBtn = `<button class="tab-btn ${activeCat === 'all' ? 'active' : ''}" data-cat="all">All <span class="count">(${PRODUCTS.length})</span></button>`;
+            const catBtns = CATS.map(c => {
+                const n = PRODUCTS.filter(p => p.cat === c.cat).length;
+                return `<button class="tab-btn ${activeCat === c.cat ? 'active' : ''}" data-cat="${c.cat}">${c.catLabel} <span class="count">(${n})</span></button>`;
+            }).join('');
+            tabsRow.innerHTML = allBtn + catBtns;
+        }
+
+        function renderFooterShopLinks() {
+            const el = document.getElementById('footerShopLinks');
+            if (!el) return;
+            el.innerHTML = CATS.map(c => `<li><a href="mens.html#${c.cat}">${c.catLabel}</a></li>`).join('');
+        }
+
+        function catTitle(cat) {
+            if (cat === 'all') return 'All Products';
+            const found = CATS.find(c => c.cat === cat);
+            return found ? found.catLabel : 'Products';
+        }
 
         /* ============ RENDER PRODUCTS ============ */
         function renderProducts() {
@@ -1145,7 +1171,7 @@
             const emptyState = document.getElementById('emptyState');
             const list = activeCat === "all" ? PRODUCTS : PRODUCTS.filter(p => p.cat === activeCat);
 
-            document.getElementById('resultsTitle').textContent = CAT_TITLES[activeCat];
+            document.getElementById('resultsTitle').textContent = catTitle(activeCat);
             document.getElementById('resultsCount').textContent = `${list.length} item${list.length !== 1 ? 's' : ''}`;
 
             if (list.length === 0) {
@@ -1177,6 +1203,7 @@
           <div class="price-row">
             <span class="price">Tk ${p.price}</span>
             ${p.oldPrice ? `<span class="price-old">Tk ${p.oldPrice}</span>` : ''}
+            ${p.oldPrice && p.discountValue ? `<span class="discount-tag">${p.discountValue}% OFF</span>` : ''}
           </div>
           <span class="size-label">Select Size</span>
           <div class="size-row">${sizeChips}</div>
@@ -1227,15 +1254,11 @@
         menuToggle.addEventListener('click', toggleMenu);
         navOverlay.addEventListener('click', toggleMenu);
 
-        /* ============ DEEP LINK FROM HOMEPAGE (#tshirts etc.) ============ */
+        /* ============ DEEP LINK FROM HOMEPAGE (#somecategory) ============ */
         function applyHashTab() {
             const hash = window.location.hash.replace('#', '');
-            const validCats = ["tshirts", "dropshoulders", "jerseys", "shirts"];
-            if (validCats.includes(hash)) {
+            if (CATS.some(c => c.cat === hash)) {
                 activeCat = hash;
-                document.querySelectorAll('.tab-btn').forEach(b => {
-                    b.classList.toggle('active', b.dataset.cat === hash);
-                });
             }
         }
 
@@ -1244,8 +1267,10 @@
             try {
                 const res = await fetch(`${BACKEND_URL}/api/products`);
                 PRODUCTS = await res.json();
-                updateCounts();
+                buildCategoryList();
                 applyHashTab();
+                renderTabs();
+                renderFooterShopLinks();
                 renderProducts();
             } catch (err) {
                 console.error('Failed to load products:', err);

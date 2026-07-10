@@ -718,6 +718,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .price {
@@ -729,6 +730,17 @@
             font-size: 0.85rem;
             color: var(--muted);
             text-decoration: line-through;
+        }
+
+        .discount-tag {
+            font-size: 0.68rem;
+            font-weight: 800;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            padding: 2px 7px;
+            border-radius: 3px;
+            text-transform: uppercase;
         }
 
         @media (max-width:980px) {
@@ -1510,8 +1522,8 @@
                 const res = await fetch(`${BACKEND_URL}/api/products`);
                 const PRODUCTS = await res.json();
 
-                const homeProductIds = [1, 2, 3, 4]; // pick which products show on the homepage
-                HOME_PRODUCTS = homeProductIds.map(id => PRODUCTS.find(p => p.id === id)).filter(Boolean);
+                // Show the 4 most recently added products on the homepage
+                HOME_PRODUCTS = [...PRODUCTS].slice(-4).reverse();
 
                 grid.innerHTML = HOME_PRODUCTS.map(p => `
     <div class="product-card">
@@ -1525,6 +1537,7 @@
         <div class="price-row">
           <span class="price">Tk ${p.price}</span>
           ${p.oldPrice ? `<span class="price-old">Tk ${p.oldPrice}</span>` : ''}
+          ${p.oldPrice && p.discountValue ? `<span class="discount-tag">${p.discountValue}% OFF</span>` : ''}
         </div>
         <button class="quick-add" data-id="${p.id}">Add to Cart</button>
       </div>
@@ -1557,13 +1570,6 @@
         }
         menuToggle.addEventListener('click', toggleMenu);
         navOverlay.addEventListener('click', toggleMenu);
-
-        /* ============ NEWSLETTER FORM (demo) ============ */
-        document.getElementById('nlForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            showToast("Subscribed! Check your inbox 🎉");
-            e.target.reset();
-        });
 
         function homeTrack() {
             const val = document.getElementById('homeTrackInput').value.trim();
