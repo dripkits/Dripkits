@@ -1343,14 +1343,23 @@
 
                     <div class="field">
                         <label>Original Price (Tk) *</label>
-                        <input type="number" id="pPrice" placeholder="e.g. 1200" min="0">
+                        <input type="number" id="pPrice" placeholder="e.g. 1200" min="0"
+                            oninput="onOriginalPriceChange()">
                     </div>
 
                     <div class="field">
+                        <label>Discount (%)</label>
+                        <input type="number" id="pDiscountPercent" placeholder="e.g. 20" min="0" max="100"
+                            oninput="onDiscountPercentChange()">
+                        <span class="hint">Leave blank or 0 if no discount.</span>
+                    </div>
+
+                    <div class="field full">
                         <label>Discounted Price (Tk)</label>
-                        <input type="number" id="pDiscountedPrice" placeholder="Leave blank if no discount" min="0">
-                        <span class="hint">If filled, customers pay this price and see the original price crossed
-                            out.</span>
+                        <input type="number" id="pDiscountedPrice" placeholder="Auto-calculated, or type it directly"
+                            min="0" oninput="onDiscountedPriceChange()">
+                        <span class="hint">This is what customers actually pay. Fill in the % above and this fills
+                            itself in — or type a price here directly and the % updates instead.</span>
                     </div>
 
                     <div class="field full">
@@ -1853,7 +1862,7 @@
             editingProductId = null; productImages = [];
             document.getElementById('modalTitle').textContent = 'Add New Product';
             document.getElementById('saveProductBtn').textContent = 'Save Product';
-            ['pName', 'pBadge', 'pDesc', 'pPrice', 'pDiscountedPrice', 'pCat'].forEach(id => document.getElementById(id).value = '');
+            ['pName', 'pBadge', 'pDesc', 'pPrice', 'pDiscountPercent', 'pDiscountedPrice', 'pCat'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('pActive').checked = true;
             document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('selected'));
             document.getElementById('imgPreviews').innerHTML = '';
@@ -1869,8 +1878,15 @@
             document.getElementById('saveProductBtn').textContent = 'Update Product';
             document.getElementById('pName').value = p.name;
             document.getElementById('pCat').value = p.catLabel || p.cat;
-            document.getElementById('pPrice').value = p.oldPrice || p.price;
-            document.getElementById('pDiscountedPrice').value = p.oldPrice ? p.price : '';
+            const origPrice = p.oldPrice || p.price;
+            document.getElementById('pPrice').value = origPrice;
+            if (p.oldPrice) {
+                document.getElementById('pDiscountedPrice').value = p.price;
+                document.getElementById('pDiscountPercent').value = Math.round(((origPrice - p.price) / origPrice) * 100);
+            } else {
+                document.getElementById('pDiscountedPrice').value = '';
+                document.getElementById('pDiscountPercent').value = '';
+            }
             document.getElementById('pBadge').value = p.badge || '';
             document.getElementById('pDesc').value = p.description || '';
             document.getElementById('pActive').checked = p.active;
@@ -1880,6 +1896,38 @@
         }
         function closeProductModal() { document.getElementById('productModal').classList.remove('open'); }
         function toggleSize(el) { el.classList.toggle('selected'); }
+
+        // ── PRICE / DISCOUNT AUTO-CALC ──
+        // Three linked fields: Original Price, Discount %, Discounted Price.
+        // Editing Original Price or Discount % recalculates Discounted Price.
+        // Editing Discounted Price directly recalculates Discount %.
+        function onOriginalPriceChange() {
+            const orig = Number(document.getElementById('pPrice').value) || 0;
+            const pct = Number(document.getElementById('pDiscountPercent').value) || 0;
+            if (orig > 0 && pct > 0) {
+                document.getElementById('pDiscountedPrice').value = Math.round(orig - (orig * pct / 100));
+            }
+        }
+        function onDiscountPercentChange() {
+            const orig = Number(document.getElementById('pPrice').value) || 0;
+            let pct = Number(document.getElementById('pDiscountPercent').value) || 0;
+            if (pct > 100) { pct = 100; document.getElementById('pDiscountPercent').value = 100; }
+            if (pct < 0) { pct = 0; document.getElementById('pDiscountPercent').value = 0; }
+            if (orig > 0 && pct > 0) {
+                document.getElementById('pDiscountedPrice').value = Math.round(orig - (orig * pct / 100));
+            } else if (pct === 0) {
+                document.getElementById('pDiscountedPrice').value = '';
+            }
+        }
+        function onDiscountedPriceChange() {
+            const orig = Number(document.getElementById('pPrice').value) || 0;
+            const disc = Number(document.getElementById('pDiscountedPrice').value) || 0;
+            if (orig > 0 && disc > 0 && disc < orig) {
+                document.getElementById('pDiscountPercent').value = Math.round(((orig - disc) / orig) * 100);
+            } else if (disc === 0) {
+                document.getElementById('pDiscountPercent').value = '';
+            }
+        }
 
         // ── DRAG & DROP IMAGE UPLOAD ──
         function setupDragDrop() {
@@ -1916,8 +1964,10 @@
             if (!catInput) return toast('Category is required', 'error');
 
             const discRaw = document.getElementById('pDiscountedPrice').value;
+            const pctRaw = document.getElementById('pDiscountPercent').value;
             const hasDiscount = discRaw !== '' && Number(discRaw) > 0 && Number(discRaw) < originalPrice;
             const finalPrice = hasDiscount ? Number(discRaw) : originalPrice;
+            const discountPercent = hasDiscount ? (Number(pctRaw) || Math.round(((originalPrice - finalPrice) / originalPrice) * 100)) : 0;
             const catSlug = catInput.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
             const sizes = [...document.querySelectorAll('.size-chip.selected')].map(c => c.dataset.size);
@@ -1928,8 +1978,8 @@
                 catLabel: catInput,
                 badge: document.getElementById('pBadge').value.trim() || null,
                 description: document.getElementById('pDesc').value.trim(),
-                discountType: hasDiscount ? 'fixed' : null,
-                discountValue: hasDiscount ? (originalPrice - finalPrice) : 0,
+                discountType: hasDiscount ? 'percent' : null,
+                discountValue: discountPercent,
                 sizes, outOfStock: [], images: productImages,
                 active: document.getElementById('pActive').checked
             };
