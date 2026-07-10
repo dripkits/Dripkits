@@ -29,12 +29,17 @@ app.use('/admin', express.static(path.join(__dirname, 'public')));
 app.get(['/admin', '/admin/'], (req, res) =>
     res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
-// Serve uploaded product images publicly
-app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
-
 // ── Image upload ──────────────────────────────────────────────────────────────
-const uploadDir = path.join(__dirname, 'public', 'uploads');
+// Uploaded images must live on the persistent Railway volume (same one the
+// database uses), not inside the app's code folder — otherwise every
+// redeploy wipes them out even though the database still remembers their
+// filenames. Set UPLOAD_DIR=/data/uploads in Railway's Variables tab to
+// match the mounted volume; falls back to a local folder for local dev.
+const uploadDir = process.env.UPLOAD_DIR || path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+// Serve uploaded product images publicly from that same persistent folder
+app.use('/uploads', express.static(uploadDir));
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, uploadDir),
