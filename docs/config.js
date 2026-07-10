@@ -4,4 +4,4 @@
    when you deploy (e.g. 'https://api.yourdomain.com'), instead of
    changing it in every page separately.
    ============================================================ */
-const BACKEND_URL = 'http://localhost:4000';
+const BACKEND_URL = 'https://dripkits-production.up.railway.app';
