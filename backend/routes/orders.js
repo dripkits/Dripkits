@@ -15,12 +15,15 @@ const { CUSTOM_FEE, DELIVERY_FEES } = require('../priceUtils');
 const nodemailer = require('nodemailer');
 
 // Gmail transporter — credentials loaded from .env
+// family: 4 forces IPv4 — Railway's network can't reach Gmail's IPv6
+// address, which otherwise causes "connect ENETUNREACH" errors.
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_PASS
-    }
+    },
+    family: 4
 });
 
 // Simple HTML-escape so customer-entered text can never break/inject into the notification email
