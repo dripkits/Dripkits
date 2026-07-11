@@ -1,4 +1,11 @@
 require('dotenv').config();
+
+// Railway's network can't reach IPv6 addresses, but Node sometimes resolves
+// external hosts (like Gmail's SMTP server) to IPv6 first, causing
+// "connect ENETUNREACH" errors. This forces IPv4 to be tried first for
+// all outbound connections app-wide.
+require('dns').setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
