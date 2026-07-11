@@ -12,19 +12,37 @@ const router = express.Router();
 const db = require('../db');
 const { requireAdmin, requireCustomer } = require('../middleware/auth');
 const { CUSTOM_FEE, DELIVERY_FEES } = require('../priceUtils');
-const nodemailer = require('nodemailer');
 
-// Gmail transporter — credentials loaded from .env
-// family: 4 forces IPv4 — Railway's network can't reach Gmail's IPv6
-// address, which otherwise causes "connect ENETUNREACH" errors.
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS
-    },
-    family: 4
-});
+// Email via Resend's HTTPS API — Railway blocks outbound SMTP (the ports
+// Gmail/nodemailer need) on the Free/Trial/Hobby plans, so we send email
+// over plain HTTPS instead, which is never blocked.
+async function sendOrderEmail({ subject, html }) {
+    if (!process.env.RESEND_API_KEY) {
+        console.error('Email error: RESEND_API_KEY is not set');
+        return;
+    }
+    try {
+        const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: 'Dripkits Orders <onboarding@resend.dev>',
+                to: [process.env.GMAIL_USER],
+                subject,
+                html
+            })
+        });
+        if (!res.ok) {
+            const body = await res.text();
+            console.error('Email error:', res.status, body);
+        }
+    } catch (err) {
+        console.error('Email error:', err);
+    }
+}
 
 // Simple HTML-escape so customer-entered text can never break/inject into the notification email
 function esc(s) {
@@ -163,10 +181,8 @@ router.post('/', requireCustomer, (req, res) => {
     db.prepare('UPDATE customers SET address = ?, city = ? WHERE id = ?')
         .run(o.customerAddress, o.customerCity, req.customer.id);
 
-    // Send order notification email via Gmail
-    transporter.sendMail({
-        from: `"Dripkits Orders" <${process.env.GMAIL_USER}>`,
-        to: process.env.GMAIL_USER,
+    // Send order notification email via Resend
+    sendOrderEmail({
         subject: `New Order #${orderId} - Dripkits`,
         html: `
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9f9f9;padding:24px;border-radius:8px;">
@@ -211,7 +227,7 @@ router.post('/', requireCustomer, (req, res) => {
                 </p>
             </div>
         `
-    }).catch(err => console.error('Email error:', err));
+    });
 
     res.status(201).json({ orderId });
 });
