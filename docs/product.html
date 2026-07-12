@@ -1449,209 +1449,202 @@
     <script>
         /* ============ LOAD PRODUCT FROM LIVE BACKEND CATALOG ============ */
         async function loadProduct() {
-        const params = new URLSearchParams(window.location.search);
-        const productId = Number(params.get('id'));
+            const params = new URLSearchParams(window.location.search);
+            const productId = Number(params.get('id'));
 
-        let product = null;
-        let ALL_PRODUCTS = [];
-        try {
-            const [productRes, allRes] = await Promise.all([
-                fetch(`${BACKEND_URL}/api/products/${productId}`),
-                fetch(`${BACKEND_URL}/api/products`)
-            ]);
-            product = productRes.ok ? await productRes.json() : null;
-            ALL_PRODUCTS = allRes.ok ? await allRes.json() : [];
-        } catch (err) {
-            console.error('Failed to load product:', err);
-        }
+            let product = null;
+            let ALL_PRODUCTS = [];
+            try {
+                const [productRes, allRes] = await Promise.all([
+                    fetch(`${BACKEND_URL}/api/products/${productId}`),
+                    fetch(`${BACKEND_URL}/api/products`)
+                ]);
+                product = productRes.ok ? await productRes.json() : null;
+                ALL_PRODUCTS = allRes.ok ? await allRes.json() : [];
+            } catch (err) {
+                console.error('Failed to load product:', err);
+            }
 
-        function getRelatedProducts(product, limit = 4) {
-            return ALL_PRODUCTS.filter(p => p.cat === product.cat && p.id !== product.id).slice(0, limit);
-        }
+            function getRelatedProducts(product, limit = 4) {
+                return ALL_PRODUCTS.filter(p => p.cat === product.cat && p.id !== product.id).slice(0, limit);
+            }
 
-        if (!product) {
-            document.querySelector('main').innerHTML = `
+            if (!product) {
+                document.querySelector('main').innerHTML = `
       <div class="container" style="padding:100px 24px; text-align:center;">
         <h2 style="margin-bottom:16px;">Product Not Found</h2>
         <p style="color:var(--muted); margin-bottom:24px;">This item may have been removed or the link is incorrect.</p>
         <a href="mens.html" class="btn btn-primary" style="display:inline-flex; width:auto;">Back to Shop</a>
       </div>`;
-        } else {
-            /* ---------- Populate page ---------- */
-            document.getElementById('pageTitle').textContent = `${product.name} | Dripkits`;
-            document.getElementById('pageDesc').setAttribute('content', product.description);
-            document.getElementById('breadcrumbCat').textContent = product.name;
-            document.getElementById('productCat').textContent = product.catLabel;
-            document.getElementById('productName').textContent = product.name;
-            document.getElementById('productPrice').textContent = `Tk ${product.price}`;
-            document.getElementById('productDescription').textContent = product.description;
+            } else {
+                /* ---------- Populate page ---------- */
+                document.getElementById('pageTitle').textContent = `${product.name} | Dripkits`;
+                document.getElementById('pageDesc').setAttribute('content', product.description);
+                document.getElementById('breadcrumbCat').textContent = product.name;
+                document.getElementById('productCat').textContent = product.catLabel;
+                document.getElementById('productName').textContent = product.name;
+                document.getElementById('productPrice').textContent = `Tk ${product.price}`;
+                document.getElementById('productDescription').textContent = product.description;
 
-            if (product.oldPrice) {
-                const oldEl = document.getElementById('productOldPrice');
-                oldEl.textContent = `Tk ${product.oldPrice}`;
-                oldEl.style.display = 'inline';
-                const pct = Math.round((1 - product.price / product.oldPrice) * 100);
-                const saveEl = document.getElementById('saveBadge');
-                saveEl.textContent = `Save ${pct}%`;
-                saveEl.style.display = 'inline';
-            }
-
-            if (product.badge) {
-                const badgeEl = document.getElementById('galleryBadge');
-                badgeEl.textContent = product.badge;
-                badgeEl.style.display = 'inline-block';
-            }
-
-            /* ---------- Gallery ---------- */
-            let currentImg = 0;
-            const mainImg = document.getElementById('galleryMainImg');
-            const dotsWrap = document.getElementById('galleryDots');
-            const thumbsWrap = document.getElementById('galleryThumbs');
-
-            function renderGallery() {
-                mainImg.src = resolveImg(product.images[currentImg]);
-                mainImg.alt = `${product.name} - image ${currentImg + 1}`;
-
-                dotsWrap.innerHTML = product.images.map((_, i) =>
-                    `<button class="${i === currentImg ? 'active' : ''}" data-i="${i}" aria-label="Go to image ${i + 1}"></button>`
-                ).join('');
-
-                thumbsWrap.innerHTML = product.images.map((img, i) =>
-                    `<img src="${resolveImg(img)}" class="${i === currentImg ? 'active' : ''}" data-i="${i}" alt="Thumbnail ${i + 1}">`
-                ).join('');
-            }
-            renderGallery();
-
-            document.getElementById('galleryPrev').addEventListener('click', () => {
-                currentImg = (currentImg - 1 + product.images.length) % product.images.length;
-                renderGallery();
-            });
-            document.getElementById('galleryNext').addEventListener('click', () => {
-                currentImg = (currentImg + 1) % product.images.length;
-                renderGallery();
-            });
-            dotsWrap.addEventListener('click', (e) => {
-                const btn = e.target.closest('button');
-                if (!btn) return;
-                currentImg = Number(btn.dataset.i);
-                renderGallery();
-            });
-            thumbsWrap.addEventListener('click', (e) => {
-                const img = e.target.closest('img');
-                if (!img) return;
-                currentImg = Number(img.dataset.i);
-                renderGallery();
-            });
-
-            /* ---------- Swipe support for mobile ---------- */
-            let touchStartX = 0;
-            const galleryMain = document.querySelector('.gallery-main');
-            galleryMain.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
-            galleryMain.addEventListener('touchend', (e) => {
-                const diff = e.changedTouches[0].clientX - touchStartX;
-                if (Math.abs(diff) > 40) {
-                    if (diff < 0) { currentImg = (currentImg + 1) % product.images.length; }
-                    else { currentImg = (currentImg - 1 + product.images.length) % product.images.length; }
-                    renderGallery();
+                if (product.oldPrice) {
+                    const oldEl = document.getElementById('productOldPrice');
+                    oldEl.textContent = `Tk ${product.oldPrice}`;
+                    oldEl.style.display = 'inline';
+                    const pct = Math.round((1 - product.price / product.oldPrice) * 100);
+                    const saveEl = document.getElementById('saveBadge');
+                    saveEl.textContent = `Save ${pct}%`;
+                    saveEl.style.display = 'inline';
                 }
-            });
 
-            /* ---------- Jersey customization ---------- */
-            const CUSTOM_FEE = 350;
-            const customBlock = document.getElementById('jerseyCustomBlock');
-            const customFields = document.getElementById('customFields');
-            const priceEl = document.getElementById('productPrice');
+                if (product.badge) {
+                    const badgeEl = document.getElementById('galleryBadge');
+                    badgeEl.textContent = product.badge;
+                    badgeEl.style.display = 'inline-block';
+                }
 
-            if (product.cat === 'jersey' || product.cat === 'jerseys') {
-                customBlock.style.display = 'block';
-            }
+                /* ---------- Gallery ---------- */
+                let currentImg = 0;
+                const mainImg = document.getElementById('galleryMainImg');
+                const dotsWrap = document.getElementById('galleryDots');
+                const thumbsWrap = document.getElementById('galleryThumbs');
 
-            document.querySelectorAll('input[name="customChoice"]').forEach(radio => {
-                radio.addEventListener('change', () => {
-                    customFields.style.display = radio.value === 'yes' ? 'grid' : 'none';
-                    if (radio.value === 'yes') {
-                        priceEl.textContent = `Tk ${product.price + CUSTOM_FEE}`;
-                    } else {
-                        priceEl.textContent = `Tk ${product.price}`;
-                        document.getElementById('jerseyName').value = '';
-                        document.getElementById('jerseyNumber').value = '';
+                function renderGallery() {
+                    mainImg.src = resolveImg(product.images[currentImg]);
+                    mainImg.alt = `${product.name} - image ${currentImg + 1}`;
+
+                    dotsWrap.innerHTML = product.images.map((_, i) =>
+                        `<button class="${i === currentImg ? 'active' : ''}" data-i="${i}" aria-label="Go to image ${i + 1}"></button>`
+                    ).join('');
+
+                    thumbsWrap.innerHTML = product.images.map((img, i) =>
+                        `<img src="${resolveImg(img)}" class="${i === currentImg ? 'active' : ''}" data-i="${i}" alt="Thumbnail ${i + 1}">`
+                    ).join('');
+                }
+                renderGallery();
+
+                document.getElementById('galleryPrev').addEventListener('click', () => {
+                    currentImg = (currentImg - 1 + product.images.length) % product.images.length;
+                    renderGallery();
+                });
+                document.getElementById('galleryNext').addEventListener('click', () => {
+                    currentImg = (currentImg + 1) % product.images.length;
+                    renderGallery();
+                });
+                dotsWrap.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button');
+                    if (!btn) return;
+                    currentImg = Number(btn.dataset.i);
+                    renderGallery();
+                });
+                thumbsWrap.addEventListener('click', (e) => {
+                    const img = e.target.closest('img');
+                    if (!img) return;
+                    currentImg = Number(img.dataset.i);
+                    renderGallery();
+                });
+
+                /* ---------- Swipe support for mobile ---------- */
+                let touchStartX = 0;
+                const galleryMain = document.querySelector('.gallery-main');
+                galleryMain.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+                galleryMain.addEventListener('touchend', (e) => {
+                    const diff = e.changedTouches[0].clientX - touchStartX;
+                    if (Math.abs(diff) > 40) {
+                        if (diff < 0) { currentImg = (currentImg + 1) % product.images.length; }
+                        else { currentImg = (currentImg - 1 + product.images.length) % product.images.length; }
+                        renderGallery();
                     }
                 });
-            });
 
-            /* ---------- Size selection ---------- */
-            let selectedSize = null;
-            const sizeRow = document.getElementById('sizeRow');
-            const addBtn = document.getElementById('addToCartBtn');
-            const ALL_SIZES = ["S", "M", "L", "XL", "XXL"];
+                /* ---------- Jersey customization ---------- */
+                const CUSTOM_FEE = 350;
+                const customBlock = document.getElementById('jerseyCustomBlock');
+                const customFields = document.getElementById('customFields');
+                const priceEl = document.getElementById('productPrice');
 
-            function renderSizes() {
-                sizeRow.innerHTML = ALL_SIZES.filter(s => product.sizes.includes(s)).map(s => {
-                    const isOut = product.outOfStock.includes(s);
-                    const isSelected = selectedSize === s;
-                    return `<button class="size-chip ${isOut ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-size="${s}" ${isOut ? 'disabled' : ''}>${s}</button>`;
-                }).join('');
-            }
-            renderSizes();
-
-            sizeRow.addEventListener('click', (e) => {
-                const chip = e.target.closest('.size-chip');
-                if (!chip || chip.disabled) return;
-                selectedSize = chip.dataset.size;
-                renderSizes();
-                addBtn.disabled = false;
-                addBtn.textContent = 'Add to Cart';
-            });
-
-            /* ---------- Quantity ---------- */
-            let qty = 1;
-            const qtyValue = document.getElementById('qtyValue');
-            document.getElementById('qtyInc').addEventListener('click', () => { qty++; qtyValue.textContent = qty; });
-            document.getElementById('qtyDec').addEventListener('click', () => { if (qty > 1) { qty--; qtyValue.textContent = qty; } });
-
-            /* ---------- Add to cart ---------- */
-            addBtn.addEventListener('click', () => {
-                if (!selectedSize) return;
-
-                // Build customization object for jerseys
-                let customization = null;
                 if (product.cat === 'jersey' || product.cat === 'jerseys') {
-                    const wantsCustom = document.getElementById('customYes').checked;
-                    if (wantsCustom) {
-                        const jerseyName = document.getElementById('jerseyName').value.trim().toUpperCase();
-                        const jerseyNumber = document.getElementById('jerseyNumber').value.trim();
-                        if (!jerseyName && !jerseyNumber) {
-                            alert('Please enter a name or number for your jersey, or select "No customization".');
-                            return;
+                    customBlock.style.display = 'block';
+                }
+
+                document.querySelectorAll('input[name="customChoice"]').forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        customFields.style.display = radio.value === 'yes' ? 'grid' : 'none';
+                        if (radio.value === 'yes') {
+                            priceEl.textContent = `Tk ${product.price + CUSTOM_FEE}`;
+                        } else {
+                            priceEl.textContent = `Tk ${product.price}`;
+                            document.getElementById('jerseyName').value = '';
+                            document.getElementById('jerseyNumber').value = '';
                         }
-                        customization = { name: jerseyName || null, number: jerseyNumber || null };
+                    });
+                });
+
+                /* ---------- Size selection ---------- */
+                let selectedSize = null;
+                const sizeRow = document.getElementById('sizeRow');
+                const addBtn = document.getElementById('addToCartBtn');
+                const ALL_SIZES = ["S", "M", "L", "XL", "XXL"];
+
+                function renderSizes() {
+                    sizeRow.innerHTML = ALL_SIZES.filter(s => product.sizes.includes(s)).map(s => {
+                        const isOut = product.outOfStock.includes(s);
+                        const isSelected = selectedSize === s;
+                        return `<button class="size-chip ${isOut ? 'disabled' : ''} ${isSelected ? 'selected' : ''}" data-size="${s}" ${isOut ? 'disabled' : ''}>${s}</button>`;
+                    }).join('');
+                }
+                renderSizes();
+
+                sizeRow.addEventListener('click', (e) => {
+                    const chip = e.target.closest('.size-chip');
+                    if (!chip || chip.disabled) return;
+                    selectedSize = chip.dataset.size;
+                    renderSizes();
+                    addBtn.disabled = false;
+                    addBtn.textContent = 'Add to Cart';
+                });
+
+                /* ---------- Quantity ---------- */
+                let qty = 1;
+                const qtyValue = document.getElementById('qtyValue');
+                document.getElementById('qtyInc').addEventListener('click', () => { qty++; qtyValue.textContent = qty; });
+                document.getElementById('qtyDec').addEventListener('click', () => { if (qty > 1) { qty--; qtyValue.textContent = qty; } });
+
+                /* ---------- Add to cart ---------- */
+                addBtn.addEventListener('click', () => {
+                    if (!selectedSize) return;
+
+                    // Build customization object for jerseys
+                    let customization = null;
+                    if (product.cat === 'jersey' || product.cat === 'jerseys') {
+                        const wantsCustom = document.getElementById('customYes').checked;
+                        if (wantsCustom) {
+                            const jerseyName = document.getElementById('jerseyName').value.trim().toUpperCase();
+                            const jerseyNumber = document.getElementById('jerseyNumber').value.trim();
+                            if (!jerseyName && !jerseyNumber) {
+                                alert('Please enter a name or number for your jersey, or select "No customization".');
+                                return;
+                            }
+                            customization = { name: jerseyName || null, number: jerseyNumber || null };
+                        }
                     }
-                }
 
-                for (let i = 0; i < qty; i++) {
-                    addToCart({ ...product, img: product.images[0] }, selectedSize, customization);
-                }
-            });
+                    for (let i = 0; i < qty; i++) {
+                        addToCart({ ...product, img: product.images[0] }, selectedSize, customization);
+                    }
+                });
 
-            /* ---------- Size guide modal ---------- */
-            const sizeGuideModal = document.getElementById('sizeGuideModal');
-            document.getElementById('openSizeGuide').addEventListener('click', () => {
-                const body = document.getElementById('sizeGuideBody');
-                body.innerHTML = Object.entries(product.sizeGuide).map(([size, measure]) =>
-                    `<tr><td>${size}</td><td>${measure}</td></tr>`
-                ).join('');
-                sizeGuideModal.classList.add('show');
-            });
-            document.getElementById('closeSizeGuide').addEventListener('click', () => sizeGuideModal.classList.remove('show'));
-            sizeGuideModal.addEventListener('click', (e) => { if (e.target === sizeGuideModal) sizeGuideModal.classList.remove('show'); });
+                /* ---------- Size guide — opens the same reference image used in the footer ---------- */
+                document.getElementById('openSizeGuide').addEventListener('click', () => {
+                    window.open('img/Size Guide.jpeg', '_blank');
+                });
 
-            /* ---------- Related products ---------- */
-            const related = getRelatedProducts(product, 4);
-            const relatedGrid = document.getElementById('relatedGrid');
-            if (related.length === 0) {
-                document.querySelector('.related-section').style.display = 'none';
-            } else {
-                relatedGrid.innerHTML = related.map(p => `
+                /* ---------- Related products ---------- */
+                const related = getRelatedProducts(product, 4);
+                const relatedGrid = document.getElementById('relatedGrid');
+                if (related.length === 0) {
+                    document.querySelector('.related-section').style.display = 'none';
+                } else {
+                    relatedGrid.innerHTML = related.map(p => `
         <div class="related-card" data-id="${p.id}">
           <div class="related-thumb"><img src="${resolveImg(p.images[0])}" alt="${p.name}" loading="lazy"></div>
           <div class="related-info">
@@ -1661,13 +1654,13 @@
           </div>
         </div>
       `).join('');
-                relatedGrid.addEventListener('click', (e) => {
-                    const card = e.target.closest('.related-card');
-                    if (!card) return;
-                    window.location.href = `product.html?id=${card.dataset.id}`;
-                });
+                    relatedGrid.addEventListener('click', (e) => {
+                        const card = e.target.closest('.related-card');
+                        if (!card) return;
+                        window.location.href = `product.html?id=${card.dataset.id}`;
+                    });
+                }
             }
-        }
         }
         loadProduct();
 
